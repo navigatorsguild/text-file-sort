@@ -36,11 +36,12 @@ fn test_check_not_sorted() -> Result<(), anyhow::Error> {
     common::setup();
     let input_path = PathBuf::from("./tests/fixtures/sorted-1000.dat");
     let random_path = common::temp_file_name("./target/results/");
+    let tmp_dir_path = PathBuf::from("./target/tmp");
 
     let mut random_sort = Sort::new(vec![input_path.clone()], random_path.clone());
     random_sort.add_field(Field::new(0, FieldType::String).with_random(true));
+    random_sort.with_tmp_dir(tmp_dir_path);
     random_sort.sort()?;
-
 
     let text_file_sort = Sort::new(vec![random_path.clone()], PathBuf::new());
     let result = text_file_sort.check()?;

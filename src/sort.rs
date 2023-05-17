@@ -399,7 +399,8 @@ impl Sort {
         log::info!("Set new rlimit NOFILE, soft: {}, hard: {}", new_soft, current_hard);
         Self::set_rlimits(new_soft, current_hard)?;
         let (path, _lines) = Self::internal_merge(self.input_files.clone(), &config, false, true)?;
-        std::fs::rename(path, &self.output)?;
+        std::fs::rename(path.clone(), &self.output)
+            .with_context(|| anyhow!("Rename {} to {}", path.to_string_lossy(), self.output.to_string_lossy()))?;
         log::info!("Restore rlimit NOFILE, soft: {}, hard: {}", current_soft, current_hard);
         Self::set_rlimits(current_soft, current_hard)?;
         Ok(())
@@ -520,7 +521,8 @@ impl Sort {
 
         let (path, _lines) = Self::internal_merge(sorted_files, &config, true, true)?;
 
-        std::fs::rename(path, output)?;
+        std::fs::rename(path.clone(), output.clone())
+            .with_context(|| anyhow!("Rename {} to {}", path.to_string_lossy(), output.to_string_lossy()))?;
         log::info!("Finish parallel sort");
         Ok(())
     }

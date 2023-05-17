@@ -9,6 +9,7 @@ fn test_prefix_suffix_parallel() -> Result<(), anyhow::Error> {
     common::setup();
     let input_path = PathBuf::from("./tests/fixtures/sorted-1000.dat");
     let output_path = common::temp_file_name("./target/parallel-results/");
+    let tmp_path = PathBuf::from("./target/parallel-results/");
 
     let mut text_file_sort = Sort::new(vec![input_path.clone()], output_path.clone());
     text_file_sort.with_tasks(15);
@@ -16,6 +17,7 @@ fn test_prefix_suffix_parallel() -> Result<(), anyhow::Error> {
     text_file_sort.add_prefix_line("second line".to_string());
     text_file_sort.add_suffix_line("penultimate line".to_string());
     text_file_sort.add_suffix_line("last line".to_string());
+    text_file_sort.with_tmp_dir(tmp_path.clone());
     text_file_sort.sort()?;
 
     let lines = common::read_lines(output_path.clone())?;

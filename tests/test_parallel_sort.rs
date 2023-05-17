@@ -18,6 +18,7 @@ fn test_parallel_sort() -> Result<(), anyhow::Error> {
     let tmp_path = PathBuf::from("./target/parallel-results/");
     let mut random_sort = Sort::new(vec![input_path.clone()], random_path.clone());
     random_sort.add_field(Field::new(0, FieldType::String).with_random(true));
+    random_sort.with_tmp_dir(tmp_path.clone());
     random_sort.sort()?;
 
     let mut text_file_sort = Sort::new(vec![random_path.clone()], output_path.clone());
@@ -46,6 +47,7 @@ fn test_parallel_sort_desc() -> Result<(), anyhow::Error> {
 
     let mut random_sort = Sort::new(vec![input_path.clone()], random_path.clone());
     random_sort.add_field(Field::new(0, FieldType::String).with_random(true));
+    random_sort.with_tmp_dir(tmp_path.clone());
     random_sort.sort()?;
 
     let mut asc_sort = Sort::new(vec![random_path.clone()], asc_output_path.clone());

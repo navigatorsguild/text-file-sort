@@ -590,7 +590,7 @@ fn text_file_sort_bench() -> Result<(), Error> {
             "large files",
         ),
         large_files.keys().cloned().collect(),
-        1,
+        3,
         0,
     )?;
 
@@ -608,7 +608,7 @@ fn text_file_sort_bench() -> Result<(), Error> {
             "large files",
         ),
         large_files.keys().cloned().collect(),
-        1,
+        3,
         0,
     )?;
 
