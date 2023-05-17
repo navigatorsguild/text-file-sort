@@ -1,0 +1,32 @@
+[package]
+name = "text-file-sort"
+authors = ["Giora Kosoi"]
+license = "MIT OR Apache-2.0"
+description = "Sort a text file similar to linux sort"
+homepage = "https://www.navigatorsguild.io/"
+repository = "https://github.com/navigatorsguild/text-file-sort"
+readme = "README.md"
+keywords = ["file", "sort", "algorithm"]
+categories = ["algorithms"]
+edition = "2021"
+version = "0.0.1-alpha"
+
+[badges]
+maintenance = { status = "actively-developed" }
+
+[dependencies]
+regex = "1.7.1"
+tempfile = "3.4.0"
+anyhow = "1.0.70"
+log = "0.4.17"
+simple_logger = "4.1.0"
+rlimit = "0.9.1"
+command-executor = "0.0.5-alpha"
+rand = "0.8.5"
+data-encoding = "2.3.3"
+num_cpus = "1.15.0"
+
+[dev-dependencies]
+rayon = "1.7.0"
+benchmark-rs = "0.0.10-alpha"
+tikv-jemallocator = "0.5.0"
