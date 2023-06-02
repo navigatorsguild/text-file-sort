@@ -4,7 +4,7 @@ use std::collections::BinaryHeap;
 use std::fs::File;
 use std::io::{BufRead, BufReader, BufWriter, Read, Seek, SeekFrom, Write};
 
-use anyhow::anyhow;
+use anyhow::{anyhow, Context};
 use command_executor::command::Command;
 
 use crate::chunk_iterator::Chunk;
@@ -56,8 +56,10 @@ impl SortCommand {
                 let mut reader = BufReader::new(buff.as_slice());
                 let config = get_tl_config();
 
+                let mut n = 0;
                 let mut line = String::with_capacity(line_capacity);
                 while reader.read_line(&mut line)? != 0 {
+                    n += 1;
                     if config.ignore_empty() && line.trim().is_empty() {
                         line.clear();
                         continue;
@@ -75,7 +77,15 @@ impl SortCommand {
                         config.fields(),
                         config.field_separator(),
                         config.order().clone(),
-                    )?;
+                    )
+                        .with_context(||
+                            format!(
+                                "file: {}, chunk offset: {}, line within chunk: {}",
+                                file_chunk.path().to_string_lossy(),
+                                file_chunk.offset(),
+                                n
+                            )
+                        )?;
                     line_records.push(line_record);
                     line = String::with_capacity(line_capacity);
                 }

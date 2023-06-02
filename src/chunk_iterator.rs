@@ -40,10 +40,11 @@ pub(crate) struct ChunkIterator {
     reminder: u64,
     jump: u64,
     pos: u64,
+    endl: char
 }
 
 impl ChunkIterator {
-    pub(crate) fn new(path: &PathBuf, jump: u64) -> Result<ChunkIterator, anyhow::Error> {
+    pub(crate) fn new(path: &PathBuf, jump: u64, endl: char) -> Result<ChunkIterator, anyhow::Error> {
         let metadata = path.metadata()
             .with_context(|| anyhow!("path: {}", path.to_string_lossy()))?;
         let length = metadata.len();
@@ -59,6 +60,7 @@ impl ChunkIterator {
                 reminder,
                 jump,
                 pos: 0,
+                endl,
             }
         )
     }
@@ -74,16 +76,23 @@ impl ChunkIterator {
                 )
                     .as_str()
             );
+        let before_correction = self.reader.stream_position()
+            .expect(
+                format!(
+                    "Failed to get position. Path: {}",
+                    self.path.to_string_lossy(),
+                )
+                    .as_str()
+            );
 
-        let mut line = String::new();
-        self.reader.read_line(&mut line)
+        let mut line = Vec::new();
+        self.reader.read_until(self.endl as u8, &mut line)
             .expect(
                 format!(
                     "Failed to read. Path: {}, current position: {}",
                     self.path.to_string_lossy(),
-                    self.pos,
-                )
-                    .as_str()
+                    before_correction,
+                ).as_str()
             );
 
         let current = self.reader.stream_position()
@@ -133,7 +142,7 @@ mod tests {
         let jump = 20000;
         let input_path = PathBuf::from("./tests/fixtures/empty-file.dat");
         let mut count = 0;
-        let chunk_iterator = ChunkIterator::new(&input_path, jump)?;
+        let chunk_iterator = ChunkIterator::new(&input_path, jump, '\n')?;
         for _chunk in chunk_iterator {
             count += 1;
         }
@@ -147,7 +156,7 @@ mod tests {
         let jump = input_path.metadata().unwrap().len() + 18;
         let mut count = 0;
         let mut lines = 0;
-        let chunk_iterator = ChunkIterator::new(&input_path, jump)?;
+        let chunk_iterator = ChunkIterator::new(&input_path, jump, '\n')?;
         for chunk in chunk_iterator {
             count += 1;
             assert_eq!(chunk.offset(), 0);
@@ -166,7 +175,7 @@ mod tests {
         let jump = input_path.metadata().unwrap().len() + 18;
         let mut count = 0;
         let mut lines = 0;
-        let chunk_iterator = ChunkIterator::new(&input_path, jump)?;
+        let chunk_iterator = ChunkIterator::new(&input_path, jump, '\n')?;
         for chunk in chunk_iterator {
             assert_eq!(chunk.offset(), 0);
             assert_eq!(chunk.length(), input_path.metadata().unwrap().len());
@@ -183,7 +192,7 @@ mod tests {
     fn test_no_lines_lost() -> Result<(), anyhow::Error> {
         let input_path = PathBuf::from("./tests/fixtures/sorted-10000.dat");
         let jump = 10_000;
-        let chunk_iterator = ChunkIterator::new(&input_path, jump)?;
+        let chunk_iterator = ChunkIterator::new(&input_path, jump, '\n')?;
         let mut lines = 0;
         for chunk in chunk_iterator {
             assert_eq!(chunk.path(), &input_path);

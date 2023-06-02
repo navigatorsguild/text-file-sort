@@ -20,6 +20,7 @@ pub(crate) struct Config {
     order: Order,
     prefix: Vec<String>,
     suffix: Vec<String>,
+    endl: char,
 }
 
 impl Config {
@@ -38,6 +39,7 @@ impl Config {
         order: Order,
         prefix: Vec<String>,
         suffix: Vec<String>,
+        endl: char,
     ) -> Config {
         let queue_size = 4096;
         Config {
@@ -56,6 +58,7 @@ impl Config {
             order,
             prefix,
             suffix,
+            endl,
         }
     }
 
@@ -117,5 +120,9 @@ impl Config {
 
     pub(crate) fn suffix(&self) -> &Vec<String> {
         &self.suffix
+    }
+
+    pub(crate) fn endl(&self) -> char {
+        self.endl
     }
 }

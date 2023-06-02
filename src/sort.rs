@@ -102,6 +102,7 @@ pub struct Sort {
     order: Order,
     prefix: Vec<String>,
     suffix: Vec<String>,
+    endl: char,
 }
 
 impl Sort {
@@ -117,6 +118,7 @@ impl Sort {
     /// * input is read in chunks of 10 MB bytes
     /// * default Order is Asc
     /// * prefix and suffix are empty
+    /// * default end lines is '\n'
     ///
     /// The Sort implementation will increase the file descriptor rlimit to accommodate configured
     /// open files
@@ -136,6 +138,7 @@ impl Sort {
             order: Order::Asc,
             prefix: vec![],
             suffix: vec![],
+            endl: '\n',
         }
     }
 
@@ -223,6 +226,11 @@ impl Sort {
         self.suffix = suffix_lines;
     }
 
+    /// Set line ending char - not supporting CRLF
+    pub fn with_endl(&mut self, endl: char) {
+        self.endl = endl
+    }
+
     /// Sort input files or STDIN
     pub fn sort(&self) -> Result<(), anyhow::Error> {
         let config = self.create_config();
@@ -279,6 +287,7 @@ impl Sort {
             self.order.clone(),
             self.prefix.clone(),
             self.suffix.clone(),
+            self.endl
         );
         config
     }
@@ -504,7 +513,7 @@ impl Sort {
         sorting_pool.set_thread_local(&CONFIG, Some(config.clone()));
 
         for path in input_files {
-            for chunk in ChunkIterator::new(path, config.chunk_size_bytes()).unwrap() {
+            for chunk in ChunkIterator::new(path, config.chunk_size_bytes(), config.endl()).unwrap() {
                 let sort_command = Box::new(SortCommand::new(Some(chunk)));
                 sorting_pool.submit(sort_command);
             }
