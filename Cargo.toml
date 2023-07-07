@@ -6,10 +6,10 @@ description = "Sort a text file similar to linux sort"
 homepage = "https://www.navigatorsguild.io/"
 repository = "https://github.com/navigatorsguild/text-file-sort"
 readme = "README.md"
-keywords = ["file", "sort", "algorithm"]
+keywords = ["text", "file", "sort", "algorithm"]
 categories = ["algorithms"]
 edition = "2021"
-version = "0.0.2-alpha"
+version = "0.1.0"
 
 [badges]
 maintenance = { status = "actively-developed" }
@@ -21,12 +21,12 @@ anyhow = "1.0.70"
 log = "0.4.17"
 simple_logger = "4.1.0"
 rlimit = "0.9.1"
-command-executor = "0.0.5-alpha"
+command-executor = "0.1.0"
 rand = "0.8.5"
 data-encoding = "2.3.3"
 num_cpus = "1.15.0"
 
 [dev-dependencies]
 rayon = "1.7.0"
-benchmark-rs = "0.0.10-alpha"
+benchmark-rs = "0.1.0"
 tikv-jemallocator = "0.5.0"
