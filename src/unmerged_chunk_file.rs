@@ -21,7 +21,7 @@ pub(crate) struct UnmergedChunkFile {
 
 impl UnmergedChunkFile {
     pub(crate) fn new(path: PathBuf, fields: &Vec<Field>, field_separator: char, order: Order) -> Result<UnmergedChunkFile, anyhow::Error> {
-        let file = File::open(path.clone()).with_context(|| format!("path: {}", path.to_string_lossy()))?;
+        let file = File::open(path.clone()).with_context(|| format!("path: {}", path.display()))?;
         let mut reader = BufReader::new(file);
         let mut line = String::new();
         let bytes = reader.read_line(&mut line)?;
@@ -75,7 +75,7 @@ impl PartialEq<Self> for UnmergedChunkFile {
         } else if self.head.is_none() || other.head.is_none() {
             false
         } else {
-            other.head.as_ref().unwrap().eq(&self.head.as_ref().unwrap())
+            other.head.as_ref().unwrap().eq(self.head.as_ref().unwrap())
         }
     }
 }
@@ -96,7 +96,7 @@ impl Ord for UnmergedChunkFile {
         } else if self.head.is_some() && other.head.is_none() {
             Ordering::Less
         } else {
-            other.head.as_ref().unwrap().cmp(&self.head.as_ref().unwrap())
+            other.head.as_ref().unwrap().cmp(self.head.as_ref().unwrap())
         }
     }
 }

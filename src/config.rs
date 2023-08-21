@@ -24,6 +24,7 @@ pub(crate) struct Config {
 }
 
 impl Config {
+    #[allow(clippy::too_many_arguments)]
     pub(crate) fn new(
         tmp: PathBuf,
         tmp_prefix: String,

@@ -27,14 +27,13 @@ impl SortCommand {
     fn write_sorted_chunk(sorted_files: &RefCell<BinaryHeap<Reverse<SortedChunkFile>>>, chunk: Vec<LineRecord>, chunk_size: usize, config: &Config) {
         let tmp_file = create_tmp_file(config);
         let (chunk_file, path) = tmp_file
-            .keep()
-            .or_else(|e| Err(anyhow!("Failed to persist temp file: {}", e.to_string())))
+            .keep().map_err(|e| anyhow!("Failed to persist temp file: {}", e.to_string()))
             .unwrap();
 
         let mut buf_writer = BufWriter::new(chunk_file);
 
         for line_record in chunk {
-            buf_writer.write(line_record.line().as_bytes()).unwrap();
+            buf_writer.write_all(line_record.line().as_bytes()).unwrap();
         }
 
         sorted_files
@@ -51,7 +50,7 @@ impl SortCommand {
             Some(file_chunk) => {
                 let mut file = File::open(file_chunk.path())?;
                 file.seek(SeekFrom::Start(file_chunk.offset()))?;
-                let mut buff = vec![0 as u8; file_chunk.length() as usize];
+                let mut buff = vec![0; file_chunk.length() as usize];
                 file.read_exact(&mut buff)?;
                 let mut reader = BufReader::new(buff.as_slice());
                 let config = get_tl_config();
@@ -81,7 +80,7 @@ impl SortCommand {
                         .with_context(||
                             format!(
                                 "file: {}, chunk offset: {}, line within chunk: {}",
-                                file_chunk.path().to_string_lossy(),
+                                file_chunk.path().display(),
                                 file_chunk.offset(),
                                 n
                             )
@@ -111,9 +110,7 @@ impl Command for SortCommand {
                 } else {
                     let f1 = sorted_files.borrow_mut().pop().unwrap().0;
                     let f2 = sorted_files.borrow_mut().pop().unwrap().0;
-                    let mut files = Vec::new();
-                    files.push(f1.path().clone());
-                    files.push(f2.path().clone());
+                    let files = vec![f1.path().clone(), f2.path().clone()];
 
                     let (path, lines) = Sort::internal_merge(files, &config, true, false).unwrap();
                     let merged = SortedChunkFile::new(path, lines);

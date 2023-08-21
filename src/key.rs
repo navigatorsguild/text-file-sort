@@ -2,7 +2,6 @@ use std::cmp::Ordering;
 use std::str::FromStr;
 
 use data_encoding::HEXLOWER;
-use rand;
 
 use crate::field::Field;
 use crate::field_type::FieldType;

@@ -3,7 +3,7 @@ use std::cmp::{max, Reverse};
 use std::collections::BinaryHeap;
 use std::fs::File;
 use std::io::{BufRead, BufReader, BufWriter, Write};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex};
 use std::thread;
 
@@ -62,7 +62,7 @@ pub(crate) fn create_tmp_file(config: &Config) -> NamedTempFile {
         .prefix(config.tmp_prefix())
         .suffix(config.tmp_suffix())
         .tempfile_in(config.tmp())
-        .or_else(|e| Err(anyhow!("Failed to create new temp file: {}", e.to_string())))
+        .map_err(|e| anyhow!("Failed to create new temp file: {}", e.to_string()))
         .unwrap()
 }
 
@@ -256,7 +256,7 @@ impl Sort {
     }
 
     fn create_config(&self) -> Config {
-        let fields = if self.fields.len() == 0 {
+        let fields = if self.fields.is_empty() {
             vec![Field::new(0, FieldType::String)]
         } else {
             self.fields.clone()
@@ -272,7 +272,7 @@ impl Sort {
             files = self.files
         }
 
-        let config = Config::new(
+        Config::new(
             self.tmp.clone(),
             "part-".to_string(),
             ".unmerged".to_string(),
@@ -288,8 +288,7 @@ impl Sort {
             self.prefix.clone(),
             self.suffix.clone(),
             self.endl
-        );
-        config
+        )
     }
 
     fn merge_sorted_files(thread_pool: &ThreadPool) {
@@ -409,7 +408,7 @@ impl Sort {
         Self::set_rlimits(new_soft, current_hard)?;
         let (path, _lines) = Self::internal_merge(self.input_files.clone(), &config, false, true)?;
         std::fs::rename(path.clone(), &self.output)
-            .with_context(|| anyhow!("Rename {} to {}", path.to_string_lossy(), self.output.to_string_lossy()))?;
+            .with_context(|| anyhow!("Rename {} to {}", path.display(), self.output.display()))?;
         log::info!("Restore rlimit NOFILE, soft: {}, hard: {}", current_soft, current_hard);
         Self::set_rlimits(current_soft, current_hard)?;
         Ok(())
@@ -429,12 +428,12 @@ impl Sort {
         }
 
         if files.len() == 1 {
-            let file = File::open(files[0].clone()).with_context(|| format!("path: {}", files[0].to_string_lossy()))?;
+            let file = File::open(files[0].clone()).with_context(|| format!("path: {}", files[0].display()))?;
             let mut reader = BufReader::new(file);
             let mut line = String::new();
 
             while reader.read_line(&mut line)? > 0 {
-                merged_writer.write(line.as_bytes())?;
+                merged_writer.write_all(line.as_bytes())?;
                 line = String::new();
                 merged_len += 1;
             }
@@ -458,10 +457,9 @@ impl Sort {
                 let mut current_min_done = false;
                 // comparison operators are flipped to work with BinaryHeap (Max Heap)
                 while &current_min >= unmerged_min {
-                    let line_record = current_min.line_record();
-                    if line_record.is_some() {
-                        let line = line_record.unwrap().line();
-                        merged_writer.write(line.as_bytes())?;
+                    if let Some(line_record) = current_min.line_record() {
+                        let line = line_record.line();
+                        merged_writer.write_all(line.as_bytes())?;
                         merged_len += 1;
                     } else {
                         current_min_done = true;
@@ -477,10 +475,9 @@ impl Sort {
             }
             let mut current_min = unmerged_files.pop().unwrap();
             loop {
-                let line_record = current_min.line_record();
-                if line_record.is_some() {
-                    let line = line_record.unwrap().line();
-                    merged_writer.write(line.as_bytes())?;
+                if let Some(line_record) = current_min.line_record() {
+                    let line = line_record.line();
+                    merged_writer.write_all(line.as_bytes())?;
                     merged_len += 1;
                 } else {
                     std::fs::remove_file(current_min.path())?;
@@ -499,7 +496,7 @@ impl Sort {
         Ok((path, merged_len))
     }
 
-    fn internal_sort(input_files: &Vec<PathBuf>, config: &Config, output: &PathBuf) -> Result<(), anyhow::Error> {
+    fn internal_sort(input_files: &Vec<PathBuf>, config: &Config, output: &Path) -> Result<(), anyhow::Error> {
         log::info!("Start parallel sort");
         let mut thread_pool_builder = ThreadPoolBuilder::new();
         let mut sorting_pool = thread_pool_builder
@@ -528,10 +525,10 @@ impl Sort {
         sorting_pool.shutdown();
         sorting_pool.join()?;
 
-        let (path, _lines) = Self::internal_merge(sorted_files, &config, true, true)?;
+        let (path, _lines) = Self::internal_merge(sorted_files, config, true, true)?;
 
-        std::fs::rename(path.clone(), output.clone())
-            .with_context(|| anyhow!("Rename {} to {}", path.to_string_lossy(), output.to_string_lossy()))?;
+        std::fs::rename(path.clone(), output)
+            .with_context(|| anyhow!("Rename {} to {}", path.display(), output.display()))?;
         log::info!("Finish parallel sort");
         Ok(())
     }

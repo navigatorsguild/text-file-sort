@@ -46,11 +46,11 @@ pub(crate) struct ChunkIterator {
 impl ChunkIterator {
     pub(crate) fn new(path: &PathBuf, jump: u64, endl: char) -> Result<ChunkIterator, anyhow::Error> {
         let metadata = path.metadata()
-            .with_context(|| anyhow!("path: {}", path.to_string_lossy()))?;
+            .with_context(|| anyhow!("path: {}", path.display()))?;
         let length = metadata.len();
         let reminder = length;
         let file = File::open(path)
-            .with_context(|| anyhow!("path: {}", path.to_string_lossy()))?;
+            .with_context(|| anyhow!("path: {}", path.display()))?;
 
         Ok(
             ChunkIterator {
@@ -67,43 +67,23 @@ impl ChunkIterator {
 
     fn jump(&mut self) -> u64 {
         self.reader.seek(SeekFrom::Current(self.jump as i64))
-            .expect(
-                format!(
-                    "Failed to jump. Path: {}, current position: {}, jump: {}",
-                    self.path.to_string_lossy(),
-                    self.pos,
-                    self.jump
-                )
-                    .as_str()
-            );
+            .unwrap_or_else(|_| panic!("Failed to jump. Path: {}, current position: {}, jump: {}",
+                                       self.path.display(),
+                                       self.pos,
+                                       self.jump));
         let before_correction = self.reader.stream_position()
-            .expect(
-                format!(
-                    "Failed to get position. Path: {}",
-                    self.path.to_string_lossy(),
-                )
-                    .as_str()
-            );
+            .unwrap_or_else(|_| panic!("Failed to get position. Path: {}",
+                                       self.path.display()));
 
         let mut line = Vec::new();
         self.reader.read_until(self.endl as u8, &mut line)
-            .expect(
-                format!(
-                    "Failed to read. Path: {}, current position: {}",
-                    self.path.to_string_lossy(),
-                    before_correction,
-                ).as_str()
-            );
+            .unwrap_or_else(|_| panic!("Failed to read. Path: {}, current position: {}",
+                                       self.path.display(),
+                                       before_correction));
 
-        let current = self.reader.stream_position()
-            .expect(
-                format!(
-                    "Failed to get position. Path: {}",
-                    self.path.to_string_lossy(),
-                )
-                    .as_str()
-            );
-        current
+        self.reader.stream_position()
+            .unwrap_or_else(|_| panic!("Failed to get position. Path: {}",
+                                       self.path.display()))
     }
 }
 

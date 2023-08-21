@@ -17,10 +17,8 @@ impl LineRecord {
     pub(crate) fn new(line: String, fields: &Vec<Field>, field_separator: char, order: Order) -> Result<LineRecord, anyhow::Error> {
         if fields.len() == 1 && fields[0].index() == 0 {
             let field = &fields[0];
-            let key = Key::new(line.as_str(), field).or_else(
-                |e| Err(anyhow!("line: {line}, error: {e}"))
-            )?;
-
+            let key = Key::new(line.as_str(), field)
+                .map_err(|e| anyhow!("line: {line}, error: {e}"))?;
             Ok(
                 LineRecord {
                     line,
@@ -30,7 +28,7 @@ impl LineRecord {
             )
         } else {
             let mut keys: Vec<Key> = Vec::new();
-            let parts: Vec<&str> = line.split(field_separator).into_iter().collect();
+            let parts: Vec<&str> = line.split(field_separator).collect();
             let mut error = None;
             for field in fields {
                 if field.index() == 0 {
