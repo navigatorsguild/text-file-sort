@@ -9,7 +9,7 @@ readme = "README.md"
 keywords = ["text", "file", "sort", "algorithm", "external"]
 categories = ["algorithms"]
 edition = "2021"
-version = "0.1.2"
+version = "0.2.0"
 
 [badges]
 maintenance = { status = "actively-developed" }
