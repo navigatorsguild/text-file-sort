@@ -29,7 +29,7 @@ impl Field {
     ///
     /// # Arguments
     /// * `index` - the index of the field, starting at 1. Index of 0 treats the complete line as a
-    /// field
+    ///   field
     /// * `field_type` - the type of the field. See [FieldType] for supported types
     ///
     /// # Examples

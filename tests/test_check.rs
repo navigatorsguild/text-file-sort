@@ -15,7 +15,7 @@ fn test_check_sorted() -> Result<(), anyhow::Error> {
 
     let text_file_sort = Sort::new(vec![input_path.clone(), input_path.clone()], PathBuf::new());
     let result = text_file_sort.check()?;
-    assert_eq!(result, true);
+    assert!(result);
     Ok(())
 }
 
@@ -27,7 +27,7 @@ fn test_check_sorted_desc() -> Result<(), anyhow::Error> {
     let mut text_file_sort = Sort::new(vec![input_path.clone(), input_path.clone()], PathBuf::new());
     text_file_sort.with_order(Order::Desc);
     let result = text_file_sort.check()?;
-    assert_eq!(result, true);
+    assert!(result);
     Ok(())
 }
 
@@ -45,7 +45,7 @@ fn test_check_not_sorted() -> Result<(), anyhow::Error> {
 
     let text_file_sort = Sort::new(vec![random_path.clone()], PathBuf::new());
     let result = text_file_sort.check()?;
-    assert_eq!(result, false);
+    assert!(!result);
     fs::remove_file(random_path)?;
     Ok(())
 }

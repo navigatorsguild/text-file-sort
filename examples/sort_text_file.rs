@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use anyhow::Error;
 use text_file_sort::field::Field;
 use text_file_sort::field_type::FieldType;
@@ -9,29 +9,29 @@ use tikv_jemallocator::Jemalloc;
 #[global_allocator]
 static GLOBAL: Jemalloc = Jemalloc;
 
-fn sort_random(input_path: &PathBuf, output_path: &PathBuf) -> Result<(), Error> {
-    let mut text_file = Sort::new(vec![input_path.clone()], output_path.clone());
+fn sort_random(input_path: &Path, output_path: &Path) -> Result<(), Error> {
+    let mut text_file = Sort::new(vec![input_path.to_path_buf()], output_path.to_path_buf());
     text_file.with_fields(vec![Field::new(0, FieldType::String).with_random(true)]);
     text_file.sort()?;
     Ok(())
 }
 
-fn sort_lines_ascending(input_path: &PathBuf, output_path: &PathBuf) -> Result<(), Error> {
+fn sort_lines_ascending(input_path: &Path, output_path: &Path) -> Result<(), Error> {
     // ascending order is the default
-    let text_file = Sort::new(vec![input_path.clone()], output_path.clone());
+    let text_file = Sort::new(vec![input_path.to_path_buf()], output_path.to_path_buf());
     text_file.sort()?;
     Ok(())
 }
 
-fn sort_lines_descending(input_path: &PathBuf, output_path: &PathBuf) -> Result<(), Error> {
-    let mut text_file = Sort::new(vec![input_path.clone()], output_path.clone());
+fn sort_lines_descending(input_path: &Path, output_path: &Path) -> Result<(), Error> {
+    let mut text_file = Sort::new(vec![input_path.to_path_buf()], output_path.to_path_buf());
     text_file.with_order(Order::Desc);
     text_file.sort()?;
     Ok(())
 }
 
-fn sort_records(input_path: &PathBuf, output_path: &PathBuf) -> Result<(), Error> {
-    let mut text_file = Sort::new(vec![input_path.clone()], output_path.clone());
+fn sort_records(input_path: &Path, output_path: &Path) -> Result<(), Error> {
+    let mut text_file = Sort::new(vec![input_path.to_path_buf()], output_path.to_path_buf());
     text_file.add_field(Field::new(3, FieldType::String));
     text_file.add_field(Field::new(2, FieldType::Integer));
     text_file.sort()?;

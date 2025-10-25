@@ -10,16 +10,16 @@ pub fn setup() {
     let parallel_results_dir_path = PathBuf::from_str("./target/parallel-results/").unwrap();
 
     if !results_dir_path.exists() {
-        fs::create_dir_all(&results_dir_path).expect(
-            format!("Failed to create results directory: {:?}", results_dir_path).as_str()
+        fs::create_dir_all(&results_dir_path).unwrap_or_else(|_|
+            panic!("Failed to create results directory: {:?}", results_dir_path)
         );
     } else {
         println!("Results directory exists at {:?}", results_dir_path);
     }
 
     if !parallel_results_dir_path.exists() {
-        fs::create_dir_all(&parallel_results_dir_path).expect(
-            format!("Failed to create parallel results directory: {:?}", parallel_results_dir_path).as_str()
+        fs::create_dir_all(&parallel_results_dir_path).unwrap_or_else(|_|
+            panic!("Failed to create parallel results directory: {:?}", parallel_results_dir_path)
         );
     } else {
         println!("Results directory exists at {:?}", parallel_results_dir_path);

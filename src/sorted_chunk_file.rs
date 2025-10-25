@@ -29,7 +29,7 @@ impl PartialEq<Self> for SortedChunkFile {
 
 impl PartialOrd<Self> for SortedChunkFile {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        self.lines.partial_cmp(&other.lines)
+        Some(self.cmp(other))
     }
 }
 
