@@ -27,10 +27,10 @@ use crate::sorted_chunk_file::SortedChunkFile;
 use crate::unmerged_chunk_file::UnmergedChunkFile;
 
 thread_local! {
-    pub(crate) static LINE_CAPACITY: RefCell<usize> = RefCell::new(1);
-    pub(crate) static LINE_RECORDS_CAPACITY: RefCell<usize> = RefCell::new(1);
-    pub(crate) static SORTED_FILES: RefCell<BinaryHeap<Reverse<SortedChunkFile>>> = RefCell::new(BinaryHeap::new());
-    pub(crate) static CONFIG: RefCell<Option<Config>> = RefCell::new(None);
+    pub(crate) static LINE_CAPACITY: RefCell<usize> = const { RefCell::new(1) };
+    pub(crate) static LINE_RECORDS_CAPACITY: RefCell<usize> = const { RefCell::new(1) };
+    pub(crate) static SORTED_FILES: RefCell<BinaryHeap<Reverse<SortedChunkFile>>> = const { RefCell::new(BinaryHeap::new()) };
+    pub(crate) static CONFIG: RefCell<Option<Config>> = const { RefCell::new(None) };
 }
 
 pub(crate) fn get_line_capacity() -> usize {
@@ -62,7 +62,7 @@ pub(crate) fn create_tmp_file(config: &Config) -> NamedTempFile {
         .prefix(config.tmp_prefix())
         .suffix(config.tmp_suffix())
         .tempfile_in(config.tmp())
-        .map_err(|e| anyhow!("Failed to create new temp file: {}", e.to_string()))
+        .map_err(|e| anyhow!("Failed to create new temp file: {}", e))
         .unwrap()
 }
 
@@ -299,7 +299,7 @@ impl Sort {
                         |sorted_files| {
                             if sorted_files.borrow().len() > 1 {
                                 let mut intermediate = Vec::new();
-                                while sorted_files.borrow().len() > 0 {
+                                while !sorted_files.borrow().is_empty() {
                                     let sorted_chunk_file = sorted_files.borrow_mut().pop().unwrap();
                                     let path = sorted_chunk_file.0.path().clone();
                                     intermediate.push(path);
@@ -328,7 +328,7 @@ impl Sort {
                             |sorted_files| {
                                 log::info!("Start collecting thread intermediate results, thread: {}", thread::current().name().unwrap_or("unnamed"));
                                 let mut intermediate = Vec::new();
-                                while sorted_files.borrow().len() > 0 {
+                                while !sorted_files.borrow().is_empty() {
                                     let sorted_chunk_file = sorted_files.borrow_mut().pop().unwrap();
                                     let path = sorted_chunk_file.0.path().clone();
                                     intermediate.push(path);

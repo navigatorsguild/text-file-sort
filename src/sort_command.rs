@@ -27,7 +27,7 @@ impl SortCommand {
     fn write_sorted_chunk(sorted_files: &RefCell<BinaryHeap<Reverse<SortedChunkFile>>>, chunk: Vec<LineRecord>, chunk_size: usize, config: &Config) {
         let tmp_file = create_tmp_file(config);
         let (chunk_file, path) = tmp_file
-            .keep().map_err(|e| anyhow!("Failed to persist temp file: {}", e.to_string()))
+            .keep().map_err(|e| anyhow!("Failed to persist temp file: {}", e))
             .unwrap();
 
         let mut buf_writer = BufWriter::new(chunk_file);

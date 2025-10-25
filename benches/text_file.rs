@@ -3,7 +3,7 @@ use std::fmt::{Display, Formatter};
 use std::fs;
 use std::fs::File;
 use std::io::{BufWriter, Write};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use anyhow::{anyhow, Context, Error};
 use benchmark_rs::benchmarks::Benchmarks;
@@ -30,6 +30,7 @@ pub struct BenchmarkConfig {
 }
 
 impl BenchmarkConfig {
+    #[allow(clippy::too_many_arguments)]
     pub fn new(files: BTreeMap<usize, PathBuf>, bench_results_dir: PathBuf, bench_tmp_dir: PathBuf, tasks: usize, concurrent_merge: bool, chunk_size_bytes: u64, intermediate: usize, description: &str) -> BenchmarkConfig {
         BenchmarkConfig {
             files,
@@ -93,27 +94,27 @@ fn temp_file_name(dir: &PathBuf) -> PathBuf {
     result
 }
 
-fn cleanup(bench_results_dir: &PathBuf) -> Result<(), anyhow::Error> {
+fn cleanup(bench_results_dir: &Path) -> Result<(), anyhow::Error> {
     if bench_results_dir.exists() {
-        fs::remove_dir_all(bench_results_dir.clone()).with_context(|| anyhow!("{}", bench_results_dir.to_string_lossy()))?;
+        fs::remove_dir_all(bench_results_dir).with_context(|| anyhow!("{}", bench_results_dir.to_string_lossy()))?;
     }
     Ok(())
 }
 
-fn setup(bench_input_dir: &PathBuf, bench_results_dir: &PathBuf, bench_tmp_dir: &PathBuf) -> Result<(), anyhow::Error> {
+fn setup(bench_input_dir: &Path, bench_results_dir: &Path, bench_tmp_dir: &Path) -> Result<(), anyhow::Error> {
     cleanup(bench_results_dir)?;
 
     if !bench_input_dir.exists() {
-        fs::create_dir_all(bench_input_dir.clone())?;
+        fs::create_dir_all(bench_input_dir)?;
     }
 
     if !bench_results_dir.exists() {
-        fs::create_dir_all(bench_results_dir.clone())
+        fs::create_dir_all(bench_results_dir)
             .with_context(|| anyhow!("{}", bench_results_dir.to_string_lossy()))?;
     }
 
     if !bench_tmp_dir.exists() {
-        fs::create_dir_all(bench_tmp_dir.clone())
+        fs::create_dir_all(bench_tmp_dir)
             .with_context(|| anyhow!("{}", bench_tmp_dir.to_string_lossy()))?;
     }
 

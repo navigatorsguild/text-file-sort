@@ -14,8 +14,8 @@ fn test_merge() -> Result<(), anyhow::Error> {
     let mut input_files = Vec::new();
     for i in 0..10 {
         let mut path = output_path.clone();
-        path.set_file_name(format!("sorted-1000"));
-        path.set_extension(format!("{i}"));
+        path.set_file_name("sorted-1000");
+        path.set_extension(i.to_string());
         fs::copy(input_path.clone(), path.clone())?;
         input_files.push(path.clone());
     }

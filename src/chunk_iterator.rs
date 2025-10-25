@@ -185,7 +185,7 @@ mod tests {
     fn count_lines_in_chunk(chunk: &Chunk) -> Result<usize, anyhow::Error> {
         let mut file = File::open(chunk.path())?;
         file.seek(SeekFrom::Start(chunk.offset))?;
-        let mut buff = vec![0 as u8; chunk.length() as usize];
+        let mut buff = vec![0_u8; chunk.length() as usize];
         file.read_exact(&mut buff)?;
         let reader = BufReader::new(buff.as_slice());
         let lines = reader.lines().count();
